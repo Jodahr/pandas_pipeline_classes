@@ -49,9 +49,9 @@ class DFScaler(TransformerMixin):
 
     def fit(self, X, y=None):
         if self.scaler == 'MinMaxScaler':
-            self.s = MinMaxScaler.fit()
+            self.s = MinMaxScaler.fit(X)
         elif self.scaler == 'StandardScaler':
-            self.s = StandardScaler.fit()
+            self.s = StandardScaler.fit(X)
         else:
             print('{} does not exists'.format(self.scaler))
         return self
