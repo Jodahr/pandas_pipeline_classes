@@ -180,15 +180,13 @@ class DataTypeTransformer(TransformerMixin, NoFitMixin):
         for element in self.cols:
             if self.dataType == 'category':
                 X_[element] = X_[element].astype('category')
-                return X_
-            if self.dataType == 'str':
+            elif self.dataType == 'str':
                 X_[element] = X_[element].astype(str)
-                return X_
-            if self.dataType == 'dateTime':
+            elif self.dataType == 'dateTime':
                 X_[element] = pd.to_datetime(X_[element])
-                return X_
             else:
                 print('{} not implemented.'.format(self.dataType))
+        return X_
 
                 
 class DFFeatureUnion(TransformerMixin):
