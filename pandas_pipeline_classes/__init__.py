@@ -84,7 +84,7 @@ class DFImputer_groupByLabel(TransformerMixin):
         self.y_col = None
 
     def fit(self, X, y):
-        self.y_col = y.columns.tolist()[0]
+        self.y_col = y.name
         self.conDF = pd.concat((X, y), axis=1)
         if self.method == 'median':
             self.replaceDict = self.conDF.groupby(self.y_col)[self.col]\
@@ -96,10 +96,10 @@ class DFImputer_groupByLabel(TransformerMixin):
 
     def transform(self, X):
         X_ = X if not self.copy else X.copy()
-        for key, value in self.replaceDict.iter():
+        for key, value in self.replaceDict.items():
             X_.loc[(self.conDF[self.col].isnull()) &
                    (self.conDF[self.y_col] == key),
-                   self.col] = self.impureDict[key]
+                   self.col] = self.replaceDict[key]
         return X_
 
 
