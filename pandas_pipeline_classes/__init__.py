@@ -14,7 +14,7 @@ class NoFitMixin():
         return self
 
     
-class DFTranform(TransformerMixin, BaseEstimator, NoFitMixin):
+class DFTransform(TransformerMixin, BaseEstimator, NoFitMixin):
     def __init__(self, func, copy=True):
         self.copy = copy
         self.func = func
