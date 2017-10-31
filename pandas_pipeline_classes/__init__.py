@@ -43,23 +43,25 @@ class DFDummyTransformer(TransformerMixin):
 
     
 class DFScaler(TransformerMixin):
-    def __init__(self, scaler):
+    def __init__(self, scaler, col=None):
         self.s = None
         self.scaler = scaler
-
+        self.col = col
+        
     def fit(self, X, y=None):
         if self.scaler == 'MinMaxScaler':
-            self.s = MinMaxScaler().fit(X)
+            self.s = MinMaxScaler().fit(X[[self.col]])
         elif self.scaler == 'StandardScaler':
-            self.s = StandardScaler().fit(X)
+            self.s = StandardScaler().fit(X[[self.col]])
         else:
             print('{} does not exists'.format(self.scaler))
         return self
 
     def transform(self, X):
-        Xs = self.s.transform(X)
-        Xs_df = pd.DataFrame(Xs, index=X.index, columns=X.columns)
-        return Xs_df
+        Xs = self.s.transform(X[[self.col]])
+        Xs_df = pd.DataFrame(Xs, index=X.index, columns=['scaled'])
+        X[self.col + '_scaled'] = Xs_df['scaled']
+        return X
 
 
 class DFImputer_withDict(TransformerMixin, NoFitMixin):
