@@ -142,6 +142,7 @@ class DFApply(TransformerMixin, NoFitMixin):
         self.func = func
         self.copy = copy
         self.resCol = resCol
+        self.col = col
 
     def transform(self, X):
         X_ = X if not self.copy else X.copy()
