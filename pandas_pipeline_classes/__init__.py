@@ -49,9 +49,9 @@ class DFScaler(TransformerMixin):
 
     def fit(self, X, y=None):
         if self.scaler == 'MinMaxScaler':
-            self.s = MinMaxScaler.fit(X)
+            self.s = MinMaxScaler().fit(X)
         elif self.scaler == 'StandardScaler':
-            self.s = StandardScaler.fit(X)
+            self.s = StandardScaler().fit(X)
         else:
             print('{} does not exists'.format(self.scaler))
         return self
@@ -97,8 +97,8 @@ class DFImputer_groupByLabel(TransformerMixin):
     def transform(self, X):
         X_ = X if not self.copy else X.copy()
         for key, value in self.replaceDict.items():
-            X_.loc[(self.conDF[self.col].isnull()) &
-                   (self.conDF[self.y_col] == key),
+            X_.loc[(X_[self.col].isnull()) &
+                   (X_[self.y_col] == key),
                    self.col] = self.replaceDict[key]
         return X_
 
@@ -165,7 +165,8 @@ class DropColumns(TransformerMixin, NoFitMixin):
 
     def transform(self, X):
         X_ = X if not self.copy else X.copy()
-        return X_.drop(self.cols, inplace=True, axis=1)
+        X_.drop(self.cols, inplace=True, axis=1)
+        return X_
 
     
 class DataTypeTransformer(TransformerMixin, NoFitMixin):
@@ -224,7 +225,7 @@ class DFAddMissingCatCols(TransformerMixin):
         return X
 
     def __rem_additional_dummy_columns__(self, X):
-        add_cols = set(X.cols) - set(self.columns)
+        add_cols = set(self.cols) - set(X.columns)
         if len(add_cols) != 0:
             for columns in add_cols:
                 del X[columns]
