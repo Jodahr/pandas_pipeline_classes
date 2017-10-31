@@ -176,7 +176,7 @@ class DataTypeTransformer(TransformerMixin, NoFitMixin):
     def transform(self, X):
         X_ = X if not self.copy else X.copy()
         if self.cols is None:
-            self.cols == X.columns.tolist()
+            self.cols = X.columns.tolist()
         for element in self.cols:
             if self.dataType == 'category':
                 X_[element] = X_[element].astype('category')
