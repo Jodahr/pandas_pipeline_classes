@@ -76,33 +76,33 @@ class DFImputer_withDict(TransformerMixin, NoFitMixin):
         return X_
 
 
-class DFImputer_groupByLabel(TransformerMixin):
-    def __init__(self, col, method, copy=True):
-        self.copy = copy
-        self.method = method
-        self.col = col
-        self.conDF = None
-        self.replaceDict = None
-        self.y_col = None
+# class DFImputer_groupByLabel(TransformerMixin):
+#     def __init__(self, col, method, copy=True):
+#         self.copy = copy
+#         self.method = method
+#         self.col = col
+#         self.conDF = None
+#         self.replaceDict = None
+#         self.y_col = None
 
-    def fit(self, X, y):
-        self.y_col = y.name
-        self.conDF = pd.concat((X, y), axis=1)
-        if self.method == 'median':
-            self.replaceDict = self.conDF.groupby(self.y_col)[self.col]\
-                                         .median().to_dict()
-        if self.method == 'mean':
-            self.replaceDict = self.conDF.groupby(self.y_col)[self.col]\
-                                         .mean().to_dict()
-        return self
+#     def fit(self, X, y):
+#         self.y_col = y.name
+#         self.conDF = pd.concat((X, y), axis=1)
+#         if self.method == 'median':
+#             self.replaceDict = self.conDF.groupby(self.y_col)[self.col]\
+#                                          .median().to_dict()
+#         if self.method == 'mean':
+#             self.replaceDict = self.conDF.groupby(self.y_col)[self.col]\
+#                                          .mean().to_dict()
+#         return self
 
-    def transform(self, X):
-        X_ = X if not self.copy else X.copy()
-        for key, value in self.replaceDict.items():
-            X_.loc[(X_[self.col].isnull()) &
-                   (X_[self.y_col] == key),
-                   self.col] = self.replaceDict[key]
-        return X_
+#     def transform(self, X):
+#         X_ = X if not self.copy else X.copy()
+#         for key, value in self.replaceDict.items():
+#             X_.loc[(X_[self.col].isnull()) &
+#                    (X_[self.y_col] == key),
+#                    self.col] = self.replaceDict[key]
+#         return X_
 
 
 class DFImputer(TransformerMixin):
