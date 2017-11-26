@@ -13,6 +13,11 @@ class NoFitMixin():
     def fit(self, X, y=None):
         return self
 
+
+class DFtoMat(TransformerMixin, BaseEstimator, NoFitMixin):
+    def transform(self, X):
+        return X.as_matrix()
+
     
 class DFTransform(TransformerMixin, BaseEstimator, NoFitMixin):
     def __init__(self, func, copy=True):
@@ -24,7 +29,7 @@ class DFTransform(TransformerMixin, BaseEstimator, NoFitMixin):
         return self.func(X_)
 
 
-class DFDummyTransformer(TransformerMixin):
+class DFDummyTransformer(TransformerMixin, BaseEstimator):
     def __init__(self):
         self.dv = None
 
@@ -42,7 +47,7 @@ class DFDummyTransformer(TransformerMixin):
         return XDum
 
     
-class DFScaler(TransformerMixin):
+class DFScaler(TransformerMixin, BaseEstimator):
     def __init__(self, scaler, col=None):
         self.s = None
         self.scaler = scaler
@@ -64,7 +69,7 @@ class DFScaler(TransformerMixin):
         return X
 
 
-class DFImputer_withDict(TransformerMixin, NoFitMixin):
+class DFImputer_withDict(TransformerMixin, NoFitMixin, BaseEstimator):
     def __init__(self, replaceDict, copy=True):
         self.replaceDict = replaceDict
         self.copy = copy
@@ -105,7 +110,7 @@ class DFImputer_withDict(TransformerMixin, NoFitMixin):
 #         return X_
 
 
-class DFImputer(TransformerMixin):
+class DFImputer(TransformerMixin, BaseEstimator):
     def __init__(self, col, method, copy=True):
         self.copy = copy
         self.method = method
@@ -125,7 +130,7 @@ class DFImputer(TransformerMixin):
         return X_
 
 
-class DFQuantile(TransformerMixin, NoFitMixin):
+class DFQuantile(TransformerMixin, NoFitMixin, BaseEstimator):
     def __init__(self, col, q, suffix='_quantile', copy=True):
         self.copy = copy
         self.col = col
@@ -139,7 +144,7 @@ class DFQuantile(TransformerMixin, NoFitMixin):
         return X_
 
 
-class DFApply(TransformerMixin, NoFitMixin):
+class DFApply(TransformerMixin, NoFitMixin, BaseEstimator):
     def __init__(self, func, col, resCol, copy=True):
         self.func = func
         self.copy = copy
@@ -152,7 +157,7 @@ class DFApply(TransformerMixin, NoFitMixin):
         return X_
         
 
-class ColumnSelector(TransformerMixin, NoFitMixin):
+class ColumnSelector(TransformerMixin, NoFitMixin, BaseEstimator):
     def __init__(self, cols):
         self.cols = cols
 
@@ -160,7 +165,7 @@ class ColumnSelector(TransformerMixin, NoFitMixin):
         return X[self.cols]
 
     
-class DropColumns(TransformerMixin, NoFitMixin):
+class DropColumns(TransformerMixin, NoFitMixin, BaseEstimator):
     def __init__(self, cols, copy=True):
         self.copy = copy
         self.cols = cols
@@ -171,7 +176,7 @@ class DropColumns(TransformerMixin, NoFitMixin):
         return X_
 
     
-class DataTypeTransformer(TransformerMixin, NoFitMixin):
+class DataTypeTransformer(TransformerMixin, NoFitMixin, BaseEstimator):
     def __init__(self, dataType, cols=None, copy=True):
         self.copy = copy
         self.dataType = dataType
@@ -193,7 +198,7 @@ class DataTypeTransformer(TransformerMixin, NoFitMixin):
         return X_
 
                 
-class DFFeatureUnion(TransformerMixin):
+class DFFeatureUnion(TransformerMixin, BaseEstimator):
     def __init__(self, transformer_list):
         self.transformer_list = transformer_list
 
@@ -210,7 +215,7 @@ class DFFeatureUnion(TransformerMixin):
         return Xunion
 
 
-class DFAddMissingCatCols(TransformerMixin):
+class DFAddMissingCatCols(TransformerMixin, BaseEstimator):
     def __init__(self, copy=True):
         self.copy = copy
         self.cols = None
@@ -240,7 +245,7 @@ class DFAddMissingCatCols(TransformerMixin):
         return X_
         
 
-class DFStrintToList(TransformerMixin, NoFitMixin):
+class DFStrintToList(TransformerMixin, NoFitMixin, BaseEstimator):
     def __init__(self, separator, copy=True):
         self.copy = copy
         self.separator = separator
@@ -253,7 +258,7 @@ class DFStrintToList(TransformerMixin, NoFitMixin):
         return record.split(self.separator)
         
 
-class DFArrayExplodePivot(TransformerMixin, NoFitMixin):
+class DFArrayExplodePivot(TransformerMixin, NoFitMixin, BaseEstimator):
     def __init__(self, copy=True):
         self.copy = copy
 
