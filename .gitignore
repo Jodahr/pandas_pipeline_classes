@@ -1,3 +1,4 @@
 *.~
 pandas_pipeline_classes/__python__
 pandas_pipeline_classes.egg-info
+pandas_pipeline_classes/__pycache__
