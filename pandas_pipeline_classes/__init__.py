@@ -398,7 +398,7 @@ class DropTooManyNulls(TransformerMixin, BaseEstimator):
 
     
 class DropTooManyUnique(TransformerMixin, BaseEstimator):
-    def __init__(self, threshold=0.1, copy=True):
+    def __init__(self, threshold=30, copy=True):
         self.threshold = threshold
         self.copy = copy
         self.cols = None
