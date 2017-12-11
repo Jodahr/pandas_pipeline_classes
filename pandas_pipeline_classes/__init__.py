@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from functools import reduce
 
+
 # define classes
 class NoFitMixin():
     '''Dummy Class to inherit from if you do not need a fit function.'''
@@ -359,8 +360,10 @@ class HighCardinality(TransformerMixin, BaseEstimator):
             else:
                 lookup = self.lookup_table[key]
             # join the S-column of the lookup table to the feature dataframe
-            X_ = lookup.loc[:, key+'_S'].to_frame().merge(
-                X_, left_index=True, right_on=key, how='inner')
+            # X_ = lookup.loc[:, key+'_S'].to_frame().merge(
+            #     X_, left_index=True, right_on=key, how='inner')
+            X_ = X_.join(
+                lookup.loc[:, key+'_S'].to_frame(), on=key)
             # drop the categorical column
             X_.drop(key, axis=1, inplace=True)
         # return the DF
@@ -371,7 +374,7 @@ class HighCardinality(TransformerMixin, BaseEstimator):
         large f to a soft threshold between
         the prior and posterior probability'''
         # set default f to 1 and k to mean of class, so ni
-        # return 1
+        #return 1
         return 1.0/(1 + np.exp(-(n-k)/f))
     
     def S(self, weight, posterior, prior):
@@ -411,4 +414,25 @@ class DropTooManyUnique(TransformerMixin, BaseEstimator):
     def transform(self, X):
         X_ = X if not self.copy else X.copy()
         X_.drop(self.cols, axis=1, inplace=True)
+        return X_
+
+
+class SplitCardinality(TransformerMixin, BaseEstimator):
+    def __init__(self, threshold=30, larger=True, copy=True):
+        self.threshold = threshold
+        self.copy = copy
+        self.cols = None
+        self.larger = larger
+
+    def fit(self, X, y=None):
+        nunique = X.nunique()
+        if self.larger:
+            self.cols = nunique.loc[nunique >= self.threshold].index.tolist()
+        else:
+            self.cols = nunique.loc[nunique < self.threshold].index.tolist()
+        return self
+
+    def transform(self, X):
+        X_ = X if not self.copy else X.copy()
+        X_ = X_[self.cols]
         return X_
