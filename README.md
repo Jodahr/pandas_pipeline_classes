@@ -7,3 +7,7 @@ a pandas DataFrame.
 You can install the package via pip:
 
 `pip install git+https://github.com/jodahr/pandas_pipeline_classes`
+
+## HACKING:
+
+- create substructe of the package
