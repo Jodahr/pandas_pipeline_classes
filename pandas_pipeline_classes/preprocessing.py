@@ -7,30 +7,7 @@ import numpy as np
 import pandas as pd
 from functools import reduce
 
-
-# define classes
-class NoFitMixin():
-    '''Dummy Class to inherit from if you do not need a fit function.'''
-    def fit(self, X, y=None):
-        return self
-
-
-class DFtoMat(TransformerMixin, BaseEstimator, NoFitMixin):
-    def transform(self, X):
-        return X.as_matrix()
-
-    
-class DFTransform(TransformerMixin, BaseEstimator, NoFitMixin):
-    '''Class which can be used to apply any kind of function on a DataFrame
-    inside a Pipeline. Note that used Parameters in the function cannot
-    be changed in a gridSearch.'''
-    def __init__(self, func, copy=True):
-        self.copy = copy
-        self.func = func
-
-    def transform(self, X):
-        X_ = X if not self.copy else X.copy()
-        return self.func(X_)
+from utils import NoFitMixin
 
 
 class DFDummyTransformer(TransformerMixin, BaseEstimator):
@@ -106,20 +83,6 @@ class DFImputer_withDict(TransformerMixin, NoFitMixin, BaseEstimator):
         X_ = X if not self.copy else X.copy()
         for key, value in self.replaceDict.iter():
             X_.loc[X_[key].isnull(), key] = value
-        return X_
-
-    
-class DFQuantile(TransformerMixin, NoFitMixin, BaseEstimator):
-    def __init__(self, col, q, suffix='_quantile', copy=True):
-        self.copy = copy
-        self.col = col
-        self.suffix = suffix
-        self.q = q
-
-    def transform(self, X):
-        X_ = X if not self.copy else X.copy()
-        X_[self.col + '_' + self.suffix] = pd.qcut(X_[self.col],
-                                                   self.q, labels=False)
         return X_
 
 
@@ -237,29 +200,6 @@ class DFStringToList(TransformerMixin, NoFitMixin, BaseEstimator):
         return record.split(self.separator)
         
 
-class DFArrayExplodePivot(TransformerMixin, NoFitMixin, BaseEstimator):
-    def __init__(self, copy=True):
-        self.copy = copy
-
-    def __explode__(self, X):
-        rows = []
-        ind = 0
-        for row in X:
-            for element in row:
-                rows.append([ind, element])
-            ind += 1
-        return pd.DataFrame(data=rows, columns=['old_index', 'exploded'])
-
-    def __pivot__(self, X):
-        return X.pivot(index='old_index', columns='exploded', values='val')
-
-    def transform(self, X):
-        X_ = X if not self.copy else X.copy()
-        X_ = self.__explode__(X_)
-        X_['val'] = 1
-        return self.__pivot__(X_).fillna(int(0))
-
-
 class HighCardinality(TransformerMixin, BaseEstimator):
     '''A transformation for categorical variables
     with high cardinality based on the paper
@@ -291,7 +231,7 @@ class HighCardinality(TransformerMixin, BaseEstimator):
         df = X.join(pd.DataFrame(y))
         df.fillna('NaN', axis=1, inplace=True)
         
-        if self.cols == None:
+        if self.cols is None:
             self.cols = X.columns.tolist()
             
         for col in self.cols:
@@ -374,7 +314,7 @@ class HighCardinality(TransformerMixin, BaseEstimator):
         large f to a soft threshold between
         the prior and posterior probability'''
         # set default f to 1 and k to mean of class, so ni
-        #return 1
+        # return 1
         return 1.0/(1 + np.exp(-(n-k)/f))
     
     def S(self, weight, posterior, prior):
