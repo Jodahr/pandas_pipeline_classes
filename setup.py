@@ -8,5 +8,5 @@ setup(name='pandas_pipeline_classes',
       author_email='marcelrothering@fastmail.fm',
       licence='MIT',
       packages=['pandas_pipeline_classes'],
-      install_requires = ['pandas', 'sklearn', 'numpy']
+      install_requires=['pandas', 'sklearn', 'numpy'],
       zip_safe=False)
