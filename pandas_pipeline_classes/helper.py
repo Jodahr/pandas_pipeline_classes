@@ -2,7 +2,9 @@ from matplotlib import pyplot as plt
 import sklearn
 import pandas as pd
 import numpy as np
-
+import chardet
+from chardet.universaldetector import UniversalDetector
+from bs4 import UnicodeDammit
 
 def eval(modelList, X_test):
     '''Function which takes a List of ModelTuples ('name', model)
@@ -232,5 +234,32 @@ def show_confusion_matrix(C,class_labels=['0','1']):
 
     plt.tight_layout()
     plt.show()
+
+
+def encodeDF(df, verbose=False):
+    '''This function decodes and encodes the whole DataFrame.'''
+    # extract columnNames
+    allCols = df.columns.tolist()
+    # decode/encode columnNames to Unicode
+    # UnicodeDammit seems to have some probs
+    # allCols_utf = [UnicodeDammit(col).unicode_markup for col in allCols]
+    allCols_utf = [col.decode(chardet.detect(col)['encoding']).encode('utf8') for col in allCols]
+    # set unicode ColNames
+    df.columns = allCols_utf
+    # select non_numeric columns
+    cols = df.select_dtypes(include=[object]).columns.tolist()
+    nCols = len(cols)
+    counter = 1
+    for col in cols:
+        print('encode/decode col {} ({}/{})'.format(col, counter, nCols))
+        try:
+            df[col] = df[col].apply(lambda x: x.decode(chardet.detect(x)['encoding']).encode('utf8'))
+        except:
+            try:
+                df[col].apply(lambda x: UnicodeDammit(x).unicode_markup)
+            except:
+                print "Decoding/Encoding of column {} not possible".format(col)
+        counter +=1
+    return df
 
     
