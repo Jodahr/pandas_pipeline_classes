@@ -236,6 +236,8 @@ def show_confusion_matrix(C,class_labels=['0','1']):
     plt.show()
 
 
+# only for python2?
+
 def encodeDF(df, verbose=False):
     '''This function decodes and encodes the whole DataFrame.'''
     # extract columnNames
