@@ -238,30 +238,35 @@ def show_confusion_matrix(C,class_labels=['0','1']):
 
 # only for python2?
 
-def encodeDF(df, verbose=False):
+def decode_encode(x):
+    try:
+        x_new = x.decode(chardet.detect(x)['encoding']).encode('utf8')
+    except:
+        try:
+            x_new = UnicodeDammit(x).unicode_markup
+        except:
+            #"encoding not possible"
+            x_new = x
+    return x_new
+    
+
+def encodeDF(df, verbose=False, copy=True):
     '''This function decodes and encodes the whole DataFrame.'''
+    df_ = df.copy()
     # extract columnNames
-    allCols = df.columns.tolist()
+    allCols = df_.columns.tolist()
     # decode/encode columnNames to Unicode
     # UnicodeDammit seems to have some probs
     # allCols_utf = [UnicodeDammit(col).unicode_markup for col in allCols]
-    allCols_utf = [col.decode(chardet.detect(col)['encoding']).encode('utf8') for col in allCols]
+    allCols_utf = [decode_encode(col) for col in allCols]
     # set unicode ColNames
-    df.columns = allCols_utf
+    df_.columns = allCols_utf
     # select non_numeric columns
-    cols = df.select_dtypes(include=[object]).columns.tolist()
+    cols = df_.select_dtypes(include=[object]).columns.tolist()
     nCols = len(cols)
     counter = 1
     for col in cols:
         print('encode/decode col {} ({}/{})'.format(col, counter, nCols))
-        try:
-            df[col] = df[col].apply(lambda x: x.decode(chardet.detect(x)['encoding']).encode('utf8'))
-        except:
-            try:
-                df[col].apply(lambda x: UnicodeDammit(x).unicode_markup)
-            except:
-                print("Decoding/Encoding of column {} not possible".format(col))
+        df_[col] = df_[col].apply(lambda x: decode_encode(x))
         counter +=1
-    return df
-
-    
+    return df_
