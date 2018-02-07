@@ -1,5 +1,5 @@
 from sklearn.base import TransformerMixin, BaseEstimator
-from utils import NoFitMixin
+from .utils import NoFitMixin
 import pandas as pd
 
 

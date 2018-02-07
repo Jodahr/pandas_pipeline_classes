@@ -6,8 +6,7 @@ import numpy as np
 # load useful classes
 import pandas as pd
 from functools import reduce
-
-from utils import NoFitMixin
+from .utils import NoFitMixin
 
 
 class DFDummyTransformer(TransformerMixin, BaseEstimator):
