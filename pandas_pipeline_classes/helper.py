@@ -258,7 +258,7 @@ def encodeDF(df, verbose=False):
             try:
                 df[col].apply(lambda x: UnicodeDammit(x).unicode_markup)
             except:
-                print "Decoding/Encoding of column {} not possible".format(col)
+                print("Decoding/Encoding of column {} not possible".format(col))
         counter +=1
     return df
 
