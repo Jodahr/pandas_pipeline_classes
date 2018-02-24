@@ -242,6 +242,9 @@ def show_confusion_matrix(C,class_labels=['0','1']):
     plt.tight_layout()
     plt.show()
 
+
+
+# credit goes to https://jakevdp.github.io/PythonDataScienceHandbook/06.00-figure-code.html#Decision-Tree-Levels    
 def visualize_tree(estimator, X, y, boundaries=True,
                    xlim=None, ylim=None, ax=None):
     ax = ax or plt.gca()
