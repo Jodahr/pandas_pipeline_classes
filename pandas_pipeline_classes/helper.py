@@ -246,11 +246,11 @@ def show_confusion_matrix(C,class_labels=['0','1']):
 
 # credit goes to https://jakevdp.github.io/PythonDataScienceHandbook/06.00-figure-code.html#Decision-Tree-Levels    
 def visualize_tree(estimator, X, y, boundaries=True,
-                   xlim=None, ylim=None, ax=None):
+                   xlim=None, ylim=None, ax=None, cmap='viridis'):
     ax = ax or plt.gca()
     
     # Plot the training points
-    ax.scatter(X[:, 0], X[:, 1], c=y, s=30, cmap='viridis',
+    ax.scatter(X[:, 0], X[:, 1], c=y, s=30, cmap=cmap,
                clim=(y.min(), y.max()), zorder=3)
     ax.axis('tight')
     ax.axis('off')
@@ -270,7 +270,7 @@ def visualize_tree(estimator, X, y, boundaries=True,
     Z = Z.reshape(xx.shape)
     contours = ax.contourf(xx, yy, Z, alpha=0.3,
                            levels=np.arange(n_classes + 1) - 0.5,
-                           cmap='viridis', clim=(y.min(), y.max()),
+                           cmap=cmap, clim=(y.min(), y.max()),
                            zorder=1)
 
     ax.set(xlim=xlim, ylim=ylim)
