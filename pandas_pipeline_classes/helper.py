@@ -5,6 +5,9 @@ import numpy as np
 import chardet
 from chardet.universaldetector import UniversalDetector
 from bs4 import UnicodeDammit
+from sklearn.tree import DecisionTreeClassifier
+from ipywidgets import interact
+
 
 def eval(modelList, X_test):
     '''Function which takes a List of ModelTuples ('name', model)
@@ -23,8 +26,9 @@ def precision_recall(evalDict, y_test):
     '''Function which takes an 'evalDict' and test labels y_test as input and returns 
     a Dict containing precision, recall and threshold. The Key will be the Model Name.'''
     precRecall_dict = {}
-    for key, value in evalDict.iteritems():
-        print("computing precision, recall and thresholds for model {}").format(key)
+    for key in evalDict:
+        value = evalDict[key]
+        print("computing precision, recall and thresholds for model {}".format(key))
         # value[1][:,1] is probability for positive class with label (1)
         precision, recall, thresholds = sklearn.metrics.precision_recall_curve(y_test,value[1][:,1])
         precRecall_dict[key] = [precision, recall, thresholds]
@@ -35,8 +39,9 @@ def roc_curve(evalDict, y_test):
     '''Function which takes an 'evalDict' and test labels y_test as input and returns 
     a Dict containing fpr, tpr, thresholds and auc for the models. The Key will be the Model Name.'''
     fprTpr_dict = {}
-    for key, value in evalDict.iteritems():
-        print("computing fpr, tpr and thresholds for model {}").format(key)
+    for key in evalDict:
+        value = evalDict[key]
+        print("computing fpr, tpr and thresholds for model {}".format(key))
         fpr, tpr, thresholds= sklearn.metrics.roc_curve(y_test,value[1][:,1])
         auc = sklearn.metrics.auc(fpr, tpr)
         fprTpr_dict[key] = [fpr, tpr, thresholds, auc]
@@ -47,8 +52,9 @@ def precision_recall(evalDict, y_test):
     '''Function which takes an 'evalDict' and test labels y_test as input and returns 
     a Dict containing precision, recall and threshold. The Key will be the Model Name.'''
     precRecall_dict = {}
-    for key, value in evalDict.iteritems():
-        print("computing precision, recall and thresholds for model {}").format(key)
+    for key in evalDict:
+        value = evalDict[key]
+        print("computing precision, recall and thresholds for model {}".format(key))
         # value[1][:,1] is probability for positive class with label (1)
         precision, recall, thresholds = sklearn.metrics.precision_recall_curve(y_test,value[1][:,1])
         precRecall_dict[key] = [precision, recall, thresholds]
@@ -59,8 +65,9 @@ def roc_curve(evalDict, y_test):
     '''Function which takes an 'evalDict' and test labels y_test as input and returns 
     a Dict containing fpr, tpr, thresholds and auc for the models. The Key will be the Model Name.'''
     fprTpr_dict = {}
-    for key, value in evalDict.iteritems():
-        print("computing fpr, tpr and thresholds for model {}").format(key)
+    for key in evalDict:
+        value = evalDict[key]
+        print("computing fpr, tpr and thresholds for model {}".format(key))
         fpr, tpr, thresholds= sklearn.metrics.roc_curve(y_test,value[1][:,1])
         auc = sklearn.metrics.auc(fpr, tpr)
         fprTpr_dict[key] = [fpr, tpr, thresholds, auc]
@@ -235,38 +242,115 @@ def show_confusion_matrix(C,class_labels=['0','1']):
     plt.tight_layout()
     plt.show()
 
+def visualize_tree(estimator, X, y, boundaries=True,
+                   xlim=None, ylim=None, ax=None):
+    ax = ax or plt.gca()
+    
+    # Plot the training points
+    ax.scatter(X[:, 0], X[:, 1], c=y, s=30, cmap='viridis',
+               clim=(y.min(), y.max()), zorder=3)
+    ax.axis('tight')
+    ax.axis('off')
+    if xlim is None:
+        xlim = ax.get_xlim()
+    if ylim is None:
+        ylim = ax.get_ylim()
+    
+    # fit the estimator
+    estimator.fit(X, y)
+    xx, yy = np.meshgrid(np.linspace(*xlim, num=200),
+                         np.linspace(*ylim, num=200))
+    Z = estimator.predict(np.c_[xx.ravel(), yy.ravel()])
 
-# only for python2?
+    # Put the result into a color plot
+    n_classes = len(np.unique(y))
+    Z = Z.reshape(xx.shape)
+    contours = ax.contourf(xx, yy, Z, alpha=0.3,
+                           levels=np.arange(n_classes + 1) - 0.5,
+                           cmap='viridis', clim=(y.min(), y.max()),
+                           zorder=1)
 
-def decode_encode(x):
-    try:
-        x_new = x.decode(chardet.detect(x)['encoding']).encode('utf8')
-    except:
-        try:
-            x_new = UnicodeDammit(x).unicode_markup
-        except:
-            #"encoding not possible"
-            x_new = x
-    return x_new
+    ax.set(xlim=xlim, ylim=ylim)
+    
+    # Plot the decision boundaries
+    def plot_boundaries(i, xlim, ylim):
+        if i >= 0:
+            tree = estimator.tree_
+        
+            if tree.feature[i] == 0:
+                ax.plot([tree.threshold[i], tree.threshold[i]], ylim, '-k', zorder=2)
+                plot_boundaries(tree.children_left[i],
+                                [xlim[0], tree.threshold[i]], ylim)
+                plot_boundaries(tree.children_right[i],
+                                [tree.threshold[i], xlim[1]], ylim)
+        
+            elif tree.feature[i] == 1:
+                ax.plot(xlim, [tree.threshold[i], tree.threshold[i]], '-k', zorder=2)
+                plot_boundaries(tree.children_left[i], xlim,
+                                [ylim[0], tree.threshold[i]])
+                plot_boundaries(tree.children_right[i], xlim,
+                                [tree.threshold[i], ylim[1]])
+            
+    if boundaries:
+        plot_boundaries(0, xlim, ylim)
+
+
+def plot_tree_interactive(X, y):
+    def interactive_tree(depth=5):
+        clf = DecisionTreeClassifier(max_depth=depth, random_state=0)
+        visualize_tree(clf, X, y)
+
+    return interact(interactive_tree, depth=[1, 5])
+
+
+def randomized_tree_interactive(X, y):
+    N = int(0.75 * X.shape[0])
+    
+    xlim = (X[:, 0].min(), X[:, 0].max())
+    ylim = (X[:, 1].min(), X[:, 1].max())
+    
+    def fit_randomized_tree(random_state=0):
+        clf = DecisionTreeClassifier(max_depth=15)
+        i = np.arange(len(y))
+        rng = np.random.RandomState(random_state)
+        rng.shuffle(i)
+        visualize_tree(clf, X[i[:N]], y[i[:N]], boundaries=False,
+                       xlim=xlim, ylim=ylim)
+    
+    interact(fit_randomized_tree, random_state=[0, 100]);
     
 
-def encodeDF(df, verbose=False, copy=True):
-    '''This function decodes and encodes the whole DataFrame.'''
-    df_ = df.copy()
-    # extract columnNames
-    allCols = df_.columns.tolist()
-    # decode/encode columnNames to Unicode
-    # UnicodeDammit seems to have some probs
-    # allCols_utf = [UnicodeDammit(col).unicode_markup for col in allCols]
-    allCols_utf = [decode_encode(col) for col in allCols]
-    # set unicode ColNames
-    df_.columns = allCols_utf
-    # select non_numeric columns
-    cols = df_.select_dtypes(include=[object]).columns.tolist()
-    nCols = len(cols)
-    counter = 1
-    for col in cols:
-        print('encode/decode col {} ({}/{})'.format(col, counter, nCols))
-        df_[col] = df_[col].apply(lambda x: decode_encode(x))
-        counter +=1
-    return df_
+# # only for python2?
+
+# def decode_encode(x):
+#     try:
+#         x_new = x.decode(chardet.detect(x)['encoding']).encode('utf8')
+#     except:
+#         try:
+#             x_new = UnicodeDammit(x).unicode_markup
+#         except:
+#             #"encoding not possible"
+#             x_new = x
+#     return x_new
+    
+
+# def encodeDF(df, verbose=False, copy=True):
+#     '''This function decodes and encodes the whole DataFrame.'''
+#     df_ = df.copy()
+#     # extract columnNames
+#     allCols = df_.columns.tolist()
+#     # decode/encode columnNames to Unicode
+#     # UnicodeDammit seems to have some probs
+#     # allCols_utf = [UnicodeDammit(col).unicode_markup for col in allCols]
+#     allCols_utf = [decode_encode(col) for col in allCols]
+#     # set unicode ColNames
+#     df_.columns = allCols_utf
+#     # select non_numeric columns
+#     cols = df_.select_dtypes(include=[object]).columns.tolist()
+#     nCols = len(cols)
+#     counter = 1
+#     for col in cols:
+#         print('encode/decode col {} ({}/{})'.format(col, counter, nCols))
+#         df_[col] = df_[col].apply(lambda x: decode_encode(x))
+#         counter +=1
+#     return df_
